@@ -7,7 +7,8 @@ public class Ball : MonoBehaviour
 {
     private Rigidbody m_Rigidbody;
 
-    // pointless comment
+    // pointless comment 2
+
     void Start()
     {
         m_Rigidbody = GetComponent<Rigidbody>();
