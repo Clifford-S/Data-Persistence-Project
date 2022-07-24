@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using System.IO;
 
 public class MainManager : MonoBehaviour
 {
@@ -10,15 +11,23 @@ public class MainManager : MonoBehaviour
     public int LineCount = 6;
     public Rigidbody Ball;
 
+    public Text BestScoreText; 
     public Text ScoreText;
     public GameObject GameOverText;
     
     private bool m_Started = false;
     private int m_Points;
-    
+
     private bool m_GameOver = false;
 
-    
+    [System.Serializable]
+    class DataToSerialize
+    {
+        public string highUser;
+        public int highScore;
+    }
+
+
     // Start is called before the first frame update
     void Start()
     {
@@ -36,7 +45,22 @@ public class MainManager : MonoBehaviour
                 brick.onDestroyed.AddListener(AddPoint);
             }
         }
+        //set the best score
+        BestScoreText.text = "Best Score = " + DataPacket.Instance.highUser + " " + DataPacket.Instance.highScore;
     }
+
+
+    public void SaveHighScore()
+{
+        string path = Application.persistentDataPath + "/HighScoreFile.json";
+        DataToSerialize data = new DataToSerialize();
+        data.highUser = DataPacket.Instance.userName;
+        data.highScore = DataPacket.Instance.highScore;
+        string json = JsonUtility.ToJson(data);
+        File.WriteAllText(path, json);
+}
+
+
 
     private void Update()
     {
@@ -66,6 +90,14 @@ public class MainManager : MonoBehaviour
     {
         m_Points += point;
         ScoreText.text = $"Score : {m_Points}";
+        if (DataPacket.Instance.highScore < m_Points)
+        {
+            DataPacket.Instance.highUser = DataPacket.Instance.userName;
+            DataPacket.Instance.highScore = m_Points;
+            SaveHighScore();
+            BestScoreText.text = "Best Score = " + DataPacket.Instance.highUser + " " + DataPacket.Instance.highScore;
+        }
+
     }
 
     public void GameOver()
